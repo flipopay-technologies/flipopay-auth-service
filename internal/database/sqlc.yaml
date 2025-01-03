@@ -1,0 +1,10 @@
+version: "2"  # SQLC configuration version
+
+sql:
+  - schema: /migrations    # Path to the schema files (e.g., CREATE TABLE statements)
+    queries: /queries      # Path to the SQL query files
+    engine: postgresql             # Database engine (e.g., "postgresql")
+    gen:
+      go:
+        package: queries           # Name of the Go package for generated code
+        out: /queries      # Output directory for the generated Go files
