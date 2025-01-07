@@ -37,8 +37,8 @@ jobs:
             if [ -d "flipopay-auth-service" ]; then
               cd flipopay-auth-service
               git reset --hard
-              git reset --hard origin/main
-              git pull origin main
+              git reset --hard origin main
+              git pull https://${{ secrets.PAT_TOKEN }}@github.com/flipopay-technologies/flipopay-auth-service.git
             else
               git clone https://${{ secrets.PAT_TOKEN }}@github.com/flipopay-technologies/flipopay-auth-service.git
               cd flipopay-auth-service
