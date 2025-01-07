@@ -1,0 +1,47 @@
+name: CI/CD Pipeline for Go Application Deployment
+
+on:
+  push:
+    branches:
+      - main # Trigger the workflow on push to the main branch
+
+jobs:
+  deploy-to-ec2:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Check out the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Archive and Transfer Source Code
+    - name: Archive project
+      run: tar -czf app.tar.gz . # Archive the application files
+
+    - name: Copy files to EC2
+      uses: appleboy/scp-action@v0.1.9
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_PRIVATE_KEY }}
+        source: "app.tar.gz"
+        target: "~/app.tar.gz"
+
+    # Step 3: SSH into EC2 and Build/Run Docker Container
+    - name: Deploy on EC2
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_PRIVATE_KEY }}
+        script: |
+          sudo apt-get update -y
+          sudo apt-get install -y docker.io # Ensure Docker is installed
+          cd ~
+          rm -rf app && mkdir app
+          tar -xzf app.tar.gz -C app
+          cd app
+          docker stop myapp || true
+          docker rm myapp || true
+          docker build -t myapp:latest .
+          docker run -d --name myapp -p 8080:8080 myapp:latest
