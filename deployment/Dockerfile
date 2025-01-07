@@ -13,7 +13,7 @@ RUN go mod download
 # Copy the source code into the container
 COPY . .
 
-# Build the application
+# Build the application file
 RUN go build -o main ./cmd/main.go
 
 # Use a lightweight base image for the final build
