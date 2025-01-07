@@ -16,8 +16,8 @@ jobs:
 
       # Step 2: Archive and compress the source code
       - name: Archive project
-        run: tar -czf app.tar.gz .
-
+        run: tar --exclude='./.git' --exclude='./.github' -czf app.tar.gz .
+        
       # Step 3: Copy files to EC2 using a stable version of scp-action
       - name: Copy files to EC2
         uses: appleboy/scp-action@v0.1.4
