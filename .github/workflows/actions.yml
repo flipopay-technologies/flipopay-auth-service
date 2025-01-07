@@ -39,19 +39,20 @@ jobs:
               git checkout main
               git fetch origin main
               git reset --hard origin/main
-              git pull origin main
             else
               git clone https://${{ secrets.PAT_TOKEN }}@github.com/flipopay-technologies/flipopay-auth-service.git
               cd flipopay-auth-service
               git checkout main
             fi
 
-            # Stop and remove the old Docker container if it exists
+            # Remove old Docker containers and images
             sudo docker stop myapp || true
             sudo docker rm myapp || true
             sudo docker rmi myapp:latest || true
             sudo docker system prune -af
 
-            # Build and run the Docker container
-            sudo docker build -t myapp:latest -f deployment/Dockerfile .
+            # Force rebuild the Docker image
+            sudo docker build --no-cache -t myapp:latest -f deployment/Dockerfile .
+
+            # Run the updated Docker container
             sudo docker run -d --name myapp -p 8080:8080 myapp:latest
