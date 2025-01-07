@@ -10,26 +10,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      # Step 1: Check out the code from the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # Step 2: Archive and compress the source code
-      - name: Archive project
-        run: |
-          tar --exclude='./.git' --exclude='./.github' --exclude='./app.tar.gz' -czf app.tar.gz .
-        
-      # Step 3: Copy files to EC2 using a stable version of scp-action
-      - name: Copy files to EC2
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          source: "app.tar.gz"
-          target: "~/app.tar.gz"
-
-      # Step 4: SSH into EC2 to deploy the application
+      # Step 1: SSH into EC2 to pull the repository and deploy
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -37,17 +18,27 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            # Update and install Docker if not present
+            # Install required dependencies
             sudo apt-get update -y
-            sudo apt-get install -y docker.io
-            # Extract the app archive
+            sudo apt-get install -y git docker.io
+
+            # Navigate to the home directory
             cd ~
-            rm -rf app && mkdir app
-            tar -xzf app.tar.gz -C app
-            cd app
-            # Stop and remove the old container if it exists
+
+            # Clone or pull the latest code from the repository
+            if [ -d "app" ]; then
+              cd app
+              git reset --hard
+              git pull https://raam-techie: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@github.com/raam-techie/flipopay-auth-server.git
+            else
+              git clone https://raam-techie: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@github.com/raam-techie/flipopay-auth-server.git
+              cd app
+            fi
+
+            # Stop and remove the old Docker container if it exists
             docker stop myapp || true
             docker rm myapp || true
+
             # Build and run the new Docker container
             docker build -t myapp:latest .
             docker run -d --name myapp -p 8080:8080 myapp:latest
