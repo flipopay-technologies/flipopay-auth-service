@@ -7,10 +7,10 @@ on:
 
 jobs:
   deploy-to-ec2:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04  # Use Ubuntu 24.04 for the GitHub runner
 
     steps:
-      # Step 1: SSH into EC2 to pull the repository and deploy
+      # Step 1: Deploy the application on EC2
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -18,35 +18,35 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            # Install nessesccery tools
+            # Install necessary dependencies on the EC2 instance
             if [ -x "$(command -v yum)" ]; then
-            sudo yum update -y
-            sudo yum install -y git docker
+              sudo yum update -y
+              sudo yum install -y git docker
             elif [ -x "$(command -v apt-get)" ]; then
               sudo apt-get update -y
               sudo apt-get install -y git docker.io
             fi
-            # Start the Docker service
+
+            # Start Docker service
             sudo systemctl start docker
             sudo systemctl enable docker
-      
-            # Navigate to the home directory
-            cd ~
+            sudo usermod -aG docker $USER
 
             # Clone or pull the latest code from the repository
-            if [ -d "app" ]; then
-              cd app
+            cd ~
+            if [ -d "flipopay-auth-service" ]; then
+              cd flipopay-auth-service
               git reset --hard
-              git pull https://raam-techie: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@github.com/raam-techie/flipopay-auth-server.git
+              git pull https://${{ secrets.PAT_TOKEN }}@github.com/flipopay-technologies/flipopay-auth-service.git
             else
-              git clone https://raam-techie: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@github.com/raam-techie/flipopay-auth-server.git
-              cd app
+              git clone https://${{ secrets.PAT_TOKEN }}@github.com/flipopay-technologies/flipopay-auth-service.git
+              cd flipopay-auth-service
             fi
 
             # Stop and remove the old Docker container if it exists
-            docker stop myapp || true
-            docker rm myapp || true
+            sudo docker stop myapp || true
+            sudo docker rm myapp || true
 
-            # Build and run the new Docker container
-            docker build -t myapp:latest .
-            docker run -d --name myapp -p 8080:8080 myapp:latest
+            # Build and run the Docker container
+            sudo docker build -t myapp:latest -f deployment/Dockerfile .
+            sudo docker run -d --name myapp -p 8080:8080 myapp:latest
