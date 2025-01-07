@@ -49,6 +49,8 @@ jobs:
             # Stop and remove the old Docker container if it exists
             sudo docker stop myapp || true
             sudo docker rm myapp || true
+            sudo docker rmi myapp:latest || true
+            sudo docker system prune -af
 
             # Build and run the Docker container
             sudo docker build -t myapp:latest -f deployment/Dockerfile .
