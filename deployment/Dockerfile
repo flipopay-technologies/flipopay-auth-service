@@ -1,9 +1,10 @@
 # Use the official Go image for building
-FROM golang:1.21 AS builder
+FROM golang:1.23.2 AS builder
 
 # Set environment variables for cross-compilation
-ENV GOOS=linux
-ENV GOARCH=amd64
+ENV CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -14,7 +15,7 @@ COPY go.mod go.sum ./
 # Download dependencies
 RUN go mod download
 
-# Copy the source code into the container
+# Copy the entire source code into the container
 COPY . .
 
 # Build the application file
@@ -23,7 +24,7 @@ RUN go build -o main ./cmd/main.go
 # Use a lightweight base image for the final build
 FROM alpine:latest
 
-# Install certificates (for HTTPS)
+# Install certificates (for HTTPS support)
 RUN apk --no-cache add ca-certificates
 
 # Set the working directory inside the container
@@ -35,7 +36,7 @@ COPY --from=builder /app/main .
 # Verify the binary exists and has execution permissions
 RUN chmod +x ./main
 
-# Expose the port your application runs on
+# Expose the port your application runs on (8080)
 EXPOSE 8080
 
 # Command to run the binary
