@@ -1,5 +1,9 @@
-# Use the official Go image with version >= 1.23.2
+# Use the official Go image for building
 FROM golang:1.21 AS builder
+
+# Set environment variables for cross-compilation
+ENV GOOS=linux
+ENV GOARCH=amd64
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -27,6 +31,9 @@ WORKDIR /root/
 
 # Copy the built binary from the builder
 COPY --from=builder /app/main .
+
+# Verify the binary exists and has execution permissions
+RUN chmod +x ./main
 
 # Expose the port your application runs on
 EXPOSE 8080
