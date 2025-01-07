@@ -2,22 +2,18 @@ package app
 
 import (
 	"log"
+	"net/http"
 )
 
 func StartServer() {
 
-	// lis, err := net.Listen("tcp", ":9000")
-	// if err != nil {
-	// 	log.Fatalf("failed to listen: %v", err)
-	// }
-	log.Println("Application started")
+	// Define the port to listen on
+	port := ":8080"
 
-	// grpcServer := grpc.NewServer()
-
-	// log.Println("Grpc server started")
-
-	// if err := grpcServer.Serve(lis); err != nil {
-	// 	log.Fatalf("failed to serve: %s", err)
-	// }
+	// Start the HTTP server
+	log.Printf("Starting HTTP server on port %s\n", port)
+	if err := http.ListenAndServe(port, nil); err != nil {
+		log.Fatalf("Failed to start server: %s", err)
+	}
 
 }
