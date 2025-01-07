@@ -36,11 +36,14 @@ jobs:
             cd ~
             if [ -d "flipopay-auth-service" ]; then
               cd flipopay-auth-service
-              git reset --hard
-              git pull https://${{ secrets.PAT_TOKEN }}@github.com/flipopay-technologies/flipopay-auth-service.git
+              git checkout main
+              git fetch origin main
+              git reset --hard origin/main
+              git pull origin main
             else
               git clone https://${{ secrets.PAT_TOKEN }}@github.com/flipopay-technologies/flipopay-auth-service.git
               cd flipopay-auth-service
+              git checkout main
             fi
 
             # Stop and remove the old Docker container if it exists
