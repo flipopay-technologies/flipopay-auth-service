@@ -1,4 +1,4 @@
-# Use the official Go image for building
+# Use the official Go image with version >= 1.23.2
 FROM golang:1.23.2 AS builder
 
 # Set the working directory inside the container
@@ -16,7 +16,7 @@ COPY . .
 # Build the application
 RUN go build -o main ./cmd/main.go
 
-# Use a lightweight base image for the final build (Alpine for production)
+# Use a lightweight base image for the final build
 FROM alpine:latest
 
 # Install certificates (for HTTPS)
@@ -28,7 +28,7 @@ WORKDIR /root/
 # Copy the built binary from the builder
 COPY --from=builder /app/main .
 
-# Expose the port your application runs on (e.g., 8080)
+# Expose the port your application runs on
 EXPOSE 8080
 
 # Command to run the binary
