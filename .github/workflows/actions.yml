@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-24.04  # Use Ubuntu 24.04 for the GitHub runner
 
     steps:
-      # Step 1: Deploy the application on EC2
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -18,7 +17,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            # Install necessary dependencies on the EC2 instance
+            # Install necessary dependencies
             if [ -x "$(command -v yum)" ]; then
               sudo yum update -y
               sudo yum install -y git docker
@@ -32,7 +31,7 @@ jobs:
             sudo systemctl enable docker
             sudo usermod -aG docker $USER
 
-            # Clone or pull the latest code from the repository
+            # Clone or pull the latest code
             cd ~
             if [ -d "flipopay-auth-service" ]; then
               cd flipopay-auth-service
@@ -51,8 +50,6 @@ jobs:
             sudo docker rmi myapp:latest || true
             sudo docker system prune -af
 
-            # Force rebuild the Docker image
+            # Build and run the Docker container
             sudo docker build --no-cache -t myapp:latest -f deployment/Dockerfile .
-
-            # Run the updated Docker container
             sudo docker run -d --name myapp -p 8080:8080 myapp:latest
