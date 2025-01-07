@@ -12,6 +12,7 @@ func StartServer() {
 
 	// Start the HTTP server
 	log.Printf("Starting HTTP server on port %s\n", port)
+	log.Println("CICD works properly")
 	if err := http.ListenAndServe(port, nil); err != nil {
 		log.Fatalf("Failed to start server: %s", err)
 	}
